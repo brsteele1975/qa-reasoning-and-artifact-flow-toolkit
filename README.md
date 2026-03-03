@@ -1,87 +1,60 @@
-# QRAFT — QA Artifact Generation Pipeline
+# QRAFT - QA Reasoning and Artifact Flow Toolkit
 
-AI-driven QA artifact generation pipeline exploring how structured LLM agents can reduce manual QA artifact planning workload by 60–80% while keeping human testers in control of validation and exploratory testing.
+AI-driven QA artifact generation exploring how structured LLM agents can reduce manual QA planning workload by 60-80% while keeping human testers in control of validation and exploratory testing.
+
+---
+
+## Project Status
+
+This is the active development branch. Phase 1 (smart automation) is complete and tagged as v1.0 on main. This branch is building Phase 2: LangChain-based AI agents with memory, targeted revision, and inter-agent communication.
+
+**Conversation Agent - Complete**
+The human-facing portal for the system. Handles two modes: generating a structured request from a raw PRD, and processing reviewer feedback into scoped change instructions for the Builder Agent. See `conversation_agent/README.md` for usage and details.
+
+**Builder Agent - Next**
+Reads the Conversation Agent's output and produces requirements, risk assessments, and test cases. Not yet built.
 
 ---
 
 ## Why This Exists
 
-Manual QA teams spend significant time:
+Manual QA teams spend significant time interpreting PRDs, drafting structured requirements, writing test plans, and maintaining traceability. This project compresses that effort into an AI workflow so testers can focus on risk validation, exploratory testing, critical thinking, and product quality judgment.
 
-- Interpreting PRDs
-- Drafting structured requirements
-- Writing and formatting test plans
-- Maintaining traceability between requirements and tests
-
-This project experiments with compressing that effort into a deterministic AI workflow so testers can focus on:
-
-- Risk validation
-- Exploratory testing
-- Critical thinking
-- Product quality judgment
-
-The goal is not to replace QA professionals, but to elevate them by removing repetitive artifact construction work.
+The goal is not to replace QA professionals but to elevate them by removing repetitive artifact construction work.
 
 ---
 
-## Scope (v1)
+## Pipeline
 
-### What It Is
+    PRD --> [Conversation Agent] --> generation_request.json
+                                  --> revision_request.json + execution_plan.json
+                                              |
+                                    [Builder Agent]        <-- next
+                                              |
+                                    [Validators x4]
+                                              |
+                                    [Critic Agent]
+                                              |
+                                    test_plan.md
 
-A structured AI workflow that:
-
-- Parses a PRD into discrete, testable requirements  
-- Identifies risk and assigns severity  
-- Generates classified test cases (unit, integration, e2e, exploratory, non-functional)  
-- Produces a sprint-scoped Markdown test plan for human review  
-
-It is a deterministic artifact generation pipeline, not an autonomous testing system.
-
-
-Constraints:
-
-- Linear pipeline (no orchestration engine)
-- Single LLM call per agent
-- Strict JSON output contracts
-- Markdown artifact generation for review
-- Human approval required at all times
-
-### Sample Output
-
-The `sample_output/` folder contains reference outputs generated during 
-development across three input types — a clean agile PRD, a messy PRD, 
-and raw meeting notes. These are preserved as examples of what the 
-pipeline produces and are never overwritten by the runner.
+Every arrow can go backwards. Revision requests route to the specific agent that owns the problem. Human review gates are non-negotiable at every stage.
 
 ---
 
-### What This Is Not
-
-- Not an autonomous QA system
-- Not a CI/CD automation layer
-- Not a replacement for exploratory testing
-- Not a coverage auditing engine (v1)
-
----
 ## How This System Improves
 
-The workflow is designed to get better through use. During initial testing, severity
-heuristics were updated to better define the boundaries of the core user
-journey — specifically to include post-purchase communication as a high
-severity concern.
+The workflow is designed to get better through use. When a reviewer identifies a consistent gap in agent output, the prompt is updated to encode the fix and the system is re-run to confirm the correction holds. This is the same discipline as writing a regression test after finding a bug.
 
-The pattern for iteration is simple:
-- Human reviewer identifies a consistent gap in agent output
-- The agent prompt is updated to encode the fix
-- The system is re-run to confirm the correction holds
-
-Reviewers are not just approving output — they are actively improving the
-system through their judgment.
+Reviewers are not just approving output. They are actively improving the system through their judgment.
 
 ---
 
-## Status
+## Architecture
 
-Phase 1 complete. Test plan generation from PRDs is fully implemented and validated against multiple input types.
+See ARCHITECTURE.md for the full pipeline design, agent responsibilities, shared field contracts, and the state layer.
 
-QRAFT is a multi-phase pipeline. Phase 1 is the foundation — subsequent phases cover test data generation, test script generation (Cypress, Playwright, Postman, k6), coverage summary reporting, and PR artifact generation. See `ARCHITECTURE.md` for the full pipeline design and roadmap.
+See docs/QRAFT_CHARTER.md on main for the project charter, including design principles, scope, and open engineering questions.
+
+---
+
+*Open source. Built as a portfolio project exploring AI-augmented QA workflows.*
